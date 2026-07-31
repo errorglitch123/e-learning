@@ -10,12 +10,16 @@ await connectDB()
 app.use(cors())
 
 //routes
-app.get('/',(res,req)=> res.send("API WORKING"));
+app.get('/',(req,res)=> res.send("API WORKING"));
 app.post('/clerk',express.json(),clerkWebhooks)
 
 //port 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT,()=>{
-  console.log(`Server is running on the Port ${PORT}`)
-})
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT,()=>{
+    console.log(`Server is running on the Port ${PORT}`)
+  })
+}
+
+export default app;
