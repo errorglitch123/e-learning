@@ -37,7 +37,7 @@ export const purchaseCourse = async (req,res)=>{
     const userData = await User.findById(userId);
     const courseData = await Course.findById(courseId)
     if(!userData || !courseData) {
-      res.json({success:false,message:'Data not found'});
+      return res.json({success:false,message:'Data not found'});
     }
     const PurchaseData = {
       courseId:courseData._id,
@@ -47,7 +47,7 @@ export const purchaseCourse = async (req,res)=>{
     const newPurchase = await Purchase.create(PurchaseData)
     //stripe gateway init
     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
-    const currency = process.env.CURRENCY.tolowerCase()
+    const currency = process.env.CURRENCY.toLowerCase()
     
     // creating line item for stripe checkout seession
     const lineItem = [{
@@ -82,7 +82,7 @@ export const purchaseCourse = async (req,res)=>{
 export const updateUserCourseProgress = async(req,res)=>{
   try {
     const userId = req.auth.userId;
-    const {couseId,lectureId} = req.body
+    const {courseId,lectureId} = req.body
     const progressData = await Courseprogess.findOne({userId, courseId})
 
     if(progressData){
@@ -123,16 +123,16 @@ export const addUserRating = async(req,res)=>{
   const {courseId,rating} = req.body
 
   if(!courseId || !userId || !rating || rating <1 || rating>5){
-    res.json({success:false,message:'Invaild Details'})
+    return res.json({success:false,message:'Invalid Details'})
   }
   try {
     const course = await Course.findById(courseId);
     if(!course){
-      res.json({success:false,message:'Course not found.'})
+      return res.json({success:false,message:'Course not found.'})
     }
     const user = await User.findById(userId);
     if(!user || !user.enrolledCourses.includes(courseId)){
-      res.json({success:false,message:'User has not purchase the cost.'})
+      return res.json({success:false,message:'User has not purchased the course.'})
     }
     const existingRatingIndex = course.courseRating.findIndex(r=> r.userId === userId)
     if(existingRatingIndex>-1){

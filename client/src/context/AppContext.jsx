@@ -17,7 +17,11 @@ export const AppProvider = (props) => {
   const {user} = useUser();
 
   const fetchAllCourses = async () => {
-      setAllCourses(dummyCourses);
+      try {
+        
+      } catch (error) {
+        
+      }
   };
   const calculateRating = (course) => {
     if( course.courseRatings.length ===0) return 0;

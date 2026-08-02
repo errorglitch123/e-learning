@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import User from "../model/User.js";
 import { Purchase } from "../model/Purchase.js";
 import Course from "../model/Course.js";
+import Stripe from "stripe";
  
 // api controller to manage function to manage clerk user with database
 
@@ -54,17 +55,17 @@ export const stripeWebhooks = async (req,res)=>{
   const sig = req.headers['stripe-signature'];
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripeInstance.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   }
   catch (err) {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
   // handle the event
    switch (event.type) {
-    case 'payment_intent.succeeded':
+    case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object;
       const paymentIntentId = paymentIntent.id;
-      const session = await stripeInstance.chechout.session.list({
+      const session = await stripeInstance.checkout.sessions.list({
         payment_intent:paymentIntentId,
       })
       const {purchaseId} = session.data[0].metadata;
@@ -79,10 +80,11 @@ export const stripeWebhooks = async (req,res)=>{
       await userData.save()
       purchaseData.status = 'completed';
       break;
-    case 'payment_intent.payment_failed':
+    }
+    case 'payment_intent.payment_failed': {
       const paymentIntent = event.data.object;
       const paymentIntentId = paymentIntent.id;
-      const session = await stripeInstance.chechout.session.list({
+      const session = await stripeInstance.checkout.sessions.list({
         payment_intent:paymentIntentId,
       })
       const {purchaseId} = session.data[0].metadata;
@@ -90,11 +92,12 @@ export const stripeWebhooks = async (req,res)=>{
       purchaseData.status = 'failed'
       await purchaseData.save()
       break;
+    }
     // ... handle other event types
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
 
   // Return a response to acknowledge receipt of the event
-  response.json({received: true});
+  res.json({received: true});
 }

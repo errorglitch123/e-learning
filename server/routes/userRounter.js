@@ -1,5 +1,5 @@
 import express from 'express'
-import { addUserRating, getUserById, getUserCourseProgess, purchaseCourse, updateUserCourseProgress, userEnrolledCourses } from '../controllers/userController';
+import { addUserRating, getUserById, getUserCourseProgess, purchaseCourse, updateUserCourseProgress, userEnrolledCourses } from '../controllers/userController.js';
 
 const userRouter = express.Router();
 userRouter.get('/data',getUserById);
