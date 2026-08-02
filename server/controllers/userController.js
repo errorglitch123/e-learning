@@ -1,4 +1,5 @@
 import Course from "../model/Course.js";
+import { Courseprogess } from "../model/CourseProgress.js";
 import { Purchase } from "../model/Purchase.js";
 import User from "../model/User.js";
 import Stripe from 'stripe'
@@ -72,6 +73,76 @@ export const purchaseCourse = async (req,res)=>{
       }
     })
     res.json({success:true,session_url:session.url})
+  } catch (error) {
+    res.json({success:false,message:error.message})
+  }
+}
+
+// update user course progress
+export const updateUserCourseProgress = async(req,res)=>{
+  try {
+    const userId = req.auth.userId;
+    const {couseId,lectureId} = req.body
+    const progressData = await Courseprogess.findOne({userId, courseId})
+
+    if(progressData){
+      if(progressData.lectureCompleted.includes(lectureId)){
+        return res.json({success:true,message:'Lecture Already Completed'})
+      }
+      progressData.lectureCompleted.push(lectureId)
+      await progressData.save()
+    }
+    else{
+      await Courseprogess.create({
+        userId,
+        courseId,
+        lectureCompleted:[lectureId]
+      })
+    }
+    res.json({success:true, message:'Progess Updated'})
+  } catch (error) {
+    res.json({success:false,message:error.message});
+  }
+}
+// user progress
+export const getUserCourseProgess = async(req,res)=>{
+  try {
+    const userId = req.auth.userId
+    const {courseId} = req.body
+    const progressData = await Courseprogess.findOne({userId,courseId})
+    res.json({success:true,progressData})
+  } catch (error) {
+    res.json({success:false,message:error.message})
+  }
+}
+
+// Add user Rating to Course
+
+export const addUserRating = async(req,res)=>{
+  const userId = req.auth.userId
+  const {courseId,rating} = req.body
+
+  if(!courseId || !userId || !rating || rating <1 || rating>5){
+    res.json({success:false,message:'Invaild Details'})
+  }
+  try {
+    const course = await Course.findById(courseId);
+    if(!course){
+      res.json({success:false,message:'Course not found.'})
+    }
+    const user = await User.findById(userId);
+    if(!user || !user.enrolledCourses.includes(courseId)){
+      res.json({success:false,message:'User has not purchase the cost.'})
+    }
+    const existingRatingIndex = course.courseRating.findIndex(r=> r.userId === userId)
+    if(existingRatingIndex>-1){
+      course.courseRating[existingRatingIndex].rating = rating;
+    }
+    else{
+      course.courseRating.push({userId,rating});
+    }
+    await course.save();
+    return res.json({success:true,message:'Rating added'});
   } catch (error) {
     res.json({success:false,message:error.message})
   }
