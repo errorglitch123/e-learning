@@ -30,6 +30,14 @@ export const addNewCourse = async (req, res) => {
     const parsedCourseData = await JSON.parse(courseData)
     parsedCourseData.educator = educatorId;
     const newCourse = await Course.create(parsedCourseData)
+    
+    // Explicitly configure before upload to prevent 'must supply api_key' errors in ESM
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_SECRET_KEY,
+    });
+    
     const imageUpload = await cloudinary.uploader.upload(imageFile.path)
     newCourse.courseThumbnail = imageUpload.secure_url
     await newCourse.save();

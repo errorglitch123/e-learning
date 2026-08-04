@@ -12,6 +12,7 @@ const app = express()
 //connect to db
 await connectDB()
 await connectCloudinary();
+console.log('Cloudinary Configured:', process.env.CLOUDINARY_API_KEY ? 'Has API Key' : 'Missing API Key');
 app.use(cors())
 app.use(clerkMiddleware())
 
