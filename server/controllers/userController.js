@@ -8,6 +8,9 @@ import { clerkClient } from '@clerk/express'
 export const getUserById = async( req,res)=>{
   try{
     const userId = req.auth.userId;
+    if(!userId){
+      return res.json({success:false,message:'User not authenticated'})
+    }
     let userData = await User.findById(userId);
     if(!userData){
       // Auto-create user from Clerk data (handles missing webhook scenario)

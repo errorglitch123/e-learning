@@ -42,6 +42,7 @@ export const AppProvider = (props) => {
     }
     try {
       const token = await getToken();
+      if (!token) return;
       const { data } = await axios.get(backendUrl + '/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
         setUserData(data.userData)
@@ -101,6 +102,7 @@ export const AppProvider = (props) => {
   const fetchUserEnrolledCourses = async () => {
     try {
       const token = await getToken();
+      if (!token) return;
       const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses', { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
         setEnrolledCourses(data.enrolledCourses.reverse())
