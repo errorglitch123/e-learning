@@ -7,10 +7,28 @@ import { AppContext } from "../../context/AppContext";
 
 const Navbar = () => {
   const location = useLocation();
-  const { navigate, isEducator, } = useContext(AppContext);
+  const { navigate, isEducator,backendUrl,gettoken } = useContext(AppContext);
   const isConstListPage = location.pathname === "/const-list";
   const { openSignIn, openSignUp } = useClerk();
   const { isSignedIn, user } = useUser();
+
+  const becomeEducator = async () => {
+    try {
+      if (isEducator) {
+        navigate("/educator");
+        return;
+      }
+      const token = await gettoken();
+      const { data } = await axios.post(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
+      if(data.success) {  
+        setIsEducator(true);
+        toast.success(data.message);
+      } 
+    } catch (error) {
+      toast.error(data.message);
+    }
+  };
+
   return (
     <div className={`flex justify-between items-center px-4 sm:px-10 md:px-14 lg:px-36 border-b
      border-gray-500 py-4 ${isConstListPage ? 'bg-white' : 'bg-cyan-100/70'}`}  >
@@ -21,7 +39,9 @@ const Navbar = () => {
         <div className="flex items-center gap-5">
           {user &&
             <>
-              <button onClick={() => navigate('/educator')}>{isEducator ? "Educator Dashboard" : "Be Educator"}</button>
+              <button onClick={becomeEducator}>
+                {isEducator ? "Educator Dashboard" : "Be Educator"}
+              </button>
               | <Link to="/my-enrollment">
                 My Enrollment
               </Link>
@@ -37,7 +57,9 @@ const Navbar = () => {
         <div className="flex items-center gap-1 sm:gap-2 max-sm:text-xs">
           {user &&
             <>
-              <button onClick={() => navigate('/educator')}>{isEducator ? "Educator Dashboard" : "Be Educator"}</button>
+              <button onClick={becomeEducator}>
+                {isEducator ? "Educator Dashboard" : "Be Educator"}
+              </button>
               | <Link to="/my-enrollment">
                 My Enrollment
               </Link>

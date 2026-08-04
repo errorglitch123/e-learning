@@ -6,6 +6,7 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import Footer from '../../components/students/Footer';
 import Youtube from 'react-youtube'
+import { toast } from 'react-toastify';
 
 const CourseDetail = () => {
   const { id } = useParams()
@@ -15,10 +16,16 @@ const CourseDetail = () => {
   const [playerData, setPlayerData] = useState(null)
   const { allCourses, calculateRating, calculateChapterTime,
     calculateCourseDuration,
-    calculateNoOfLecture, currency } = useContext(AppContext)
+    calculateNoOfLecture, currency, backendUrl, userData } = useContext(AppContext)
   const fetchCourseData = async () => {
-    const findCourse = allCourses.find(course => course._id === id)
-    setCourseData(findCourse)
+    try {
+      const { data } = await axios.get(backendUrl + `/api/course/${id}`)
+      if (data.success) {
+        setCourseData(data.course)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
   const toggleSection = (index) => {
     setOpenSection((prev) => (
@@ -28,10 +35,33 @@ const CourseDetail = () => {
       }
     ))
   }
-
+  const enrolledCourse = async () => {
+    try{
+      if(!userData){
+        return toast.warn('Please login to Enroll')
+      }
+      if(isAlreadyEnrolled){
+        return toast.warn('You are already enrolled in this course')
+      }
+      const token = await gettoken();
+      const { data } = await axios.post(backendUrl + `/api/user/purchase`, {courseId: courseData._id}, { headers: { Authorization: `Bearer ${token}` } })
+      if(data.success){
+        const {session_url}=data;
+        window.location.replace(session_url)
+      }
+    }
+    catch(error){
+      toast.error(error.message)
+    }
+  }
   useEffect(() => {
     fetchCourseData();
-  }, [allCourses])
+  }, [])
+  useEffect(() => {
+    if(userData && courseData){
+      setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
+    }
+  }, [userData, courseData])
 
   return (
     courseData ? (
@@ -59,7 +89,7 @@ const CourseDetail = () => {
               <p className="text-sm text-gray-500">({courseData.courseRatings.length})</p>
               <p>{courseData.enrolledStudents.length} {courseData.enrolledStudents.length > 1 ? 'Students' : 'Student'}</p>
             </div>
-            <p className='text-sm'>Course by <span className='text-blue-600 underline'>GreatStack</span></p>
+            <p className='text-sm'>Course by <span className='text-blue-600 underline'>{courseData.educator.name}</span></p>
 
             <div className='pt-8 text-gray-800'>
               <h2 className='text-xl font-semibold'>Course Structure</h2>
@@ -117,16 +147,16 @@ const CourseDetail = () => {
           <div className='max-w-course-card  z-10 shadow-custom-card rounded-t 
           md:rounded-none overflow-hidden bg-white min-w-75 sm:min-w-105 '>
             {
-                  playerData ? <Youtube videoId={playerData.videoId} opts={{
-                    playerVars: { autoplay: 1 }
-                  }} iframeClassName='w-full aspect-video' />
-                    : <img src={courseData.courseThumbnail} alt="" />
-                }
-            
+              playerData ? <Youtube videoId={playerData.videoId} opts={{
+                playerVars: { autoplay: 1 }
+              }} iframeClassName='w-full aspect-video' />
+                : <img src={courseData.courseThumbnail} alt="" />
+            }
+
             <div className='p-5'>
               <div>
                 <img src={assets.time_left_clock_icon} alt="clock"
-                      className='w-3.5' />
+                  className='w-3.5' />
 
                 <p className='text-red-500'><span className='font-medium'>5 days</span> left at this price!</p>
               </div>
@@ -153,7 +183,7 @@ const CourseDetail = () => {
                   <p>{calculateNoOfLecture(courseData)} Lecture</p>
                 </div>
               </div>
-              <button
+              <button onClick={enrolledCourse}
                 className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium'
               >{isAlreadyEnrolled ? 'Already Enrolled' : 'Enroll Now'}</button>
               <div className='p-6'>

@@ -1,7 +1,7 @@
 import express from "express";
-import {getAllCourses, getCourseId} from "../controllers/courseController.js";
+import {allCourses, getCourseId} from "../controllers/courseController.js";
 
 const courseRouter = express.Router();
-courseRouter.get('/all',getAllCourses);
+courseRouter.get('/all',allCourses);
 courseRouter.get('/:id',getCourseId);
 export default courseRouter;
