@@ -3,11 +3,11 @@ import { CourseProgress } from "../model/CourseProgress.js";
 import { Purchase } from "../model/Purchase.js";
 import User from "../model/User.js";
 import Stripe from 'stripe'
-import { clerkClient } from '@clerk/express'
+import { clerkClient, getAuth } from '@clerk/express'
 
 export const getUserById = async( req,res)=>{
   try{
-    const userId = req.auth.userId;
+    const userId = getAuth(req).userId;
     if(!userId){
       return res.json({success:false,message:'User not authenticated'})
     }
@@ -31,7 +31,7 @@ export const getUserById = async( req,res)=>{
 
 export const userEnrolledCourses = async(req,res)=>{
   try{
-    const userId = req.auth.userId;
+    const userId = getAuth(req).userId;
     const userData = await User.findById(userId).populate('enrolledCourses');
     if(!userData){
       return res.json({success:false,message:'User not found'})
@@ -46,7 +46,7 @@ export const purchaseCourse = async (req,res)=>{
   try {
     const {courseId} = req.body;
     const {origin} = req.headers
-    const userId = req.auth.userId
+    const userId = getAuth(req).userId
     const userData = await User.findById(userId);
     const courseData = await Course.findById(courseId)
     if(!userData || !courseData) {
@@ -94,7 +94,7 @@ export const purchaseCourse = async (req,res)=>{
 // update user course progress
 export const updateUserCourseProgress = async(req,res)=>{
   try {
-    const userId = req.auth.userId;
+    const userId = getAuth(req).userId;
     const {courseId,lectureId} = req.body
     const progressData = await CourseProgress.findOne({userId, courseId})
 
@@ -120,7 +120,7 @@ export const updateUserCourseProgress = async(req,res)=>{
 // user progress
 export const getUserCourseProgress = async(req,res)=>{
   try {
-    const userId = req.auth.userId
+    const userId = getAuth(req).userId
     const {courseId} = req.body
     const progressData = await CourseProgress.findOne({userId,courseId})
     res.json({success:true,progressData})
@@ -132,7 +132,7 @@ export const getUserCourseProgress = async(req,res)=>{
 // Add user Rating to Course
 
 export const addUserRating = async(req,res)=>{
-  const userId = req.auth.userId
+  const userId = getAuth(req).userId
   const {courseId,rating} = req.body
 
   if(!courseId || !userId || !rating || rating <1 || rating>5){
