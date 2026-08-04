@@ -4,13 +4,15 @@ import { Link, useLocation } from 'react-router-dom'
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { useContext } from "react";
 import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const location = useLocation();
-  const { navigate, isEducator, backendUrl, gettoken } = useContext(AppContext);
-  const isConstListPage = location.pathname === "/const-list";
-  const { openSignIn, openSignUp } = useClerk();
-  const { isSignedIn, user } = useUser();
+  const { navigate, isEducator, backendUrl, setIsEducator, getToken } = useContext(AppContext);
+  const isConstListPage = location.pathname === "/course-list";
+  const { openSignIn } = useClerk();
+  const { user } = useUser();
 
   const becomeEducator = async () => {
     try {
@@ -18,14 +20,16 @@ const Navbar = () => {
         navigate("/educator");
         return;
       }
-      const token = await gettoken();
-      const { data } = await axios.post(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
         setIsEducator(true);
         toast.success(data.message);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(data.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
