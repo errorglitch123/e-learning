@@ -23,7 +23,7 @@ const CourseCard = ({course}) => {
               }  className="w-4 h-4"/>
             ))}
           </div>
-          <p className="text-sm text-gray-500">({course.courseRatings.length})</p>
+          <p className="text-sm text-gray-500">({course.courseRating.length})</p>
         </div>
         <p className="text-lg font-bold text-gray-800">{currency}{(course.coursePrice - course.discount*course.coursePrice/100).toFixed(2)}</p>
       </div>

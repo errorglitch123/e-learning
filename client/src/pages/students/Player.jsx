@@ -7,6 +7,8 @@ import YouTube from 'react-youtube'
 import Footer from '../../components/students/Footer'
 import Rating from '../../components/students/Rating'
 import Loading from '../../components/students/Loading'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Player = () => {
   const { enrolledCourses, calculateChapterTime,backendUrl,getToken,userData,fetchUserEnrolledCourses } = useContext(AppContext)
@@ -67,7 +69,6 @@ const Player = () => {
       const token = await getToken();
       const { data } = await axios.post(backendUrl + `/api/user/get-course-progress`,{courseId}, { headers: { Authorization: `Bearer ${token}` } });
       if(data.success){
-        toast.success(data.message)
         setProgressData(data.progressData)
       }else{
         toast.error(data.message)
@@ -84,9 +85,9 @@ const Player = () => {
       if(data.success){
         toast.success(data.message)
         setInitialRating(rating)
+        fetchUserEnrolledCourses()
       }else{
         toast.error(data.message)
-        fetchUserEnrolledCourses()
       }
     }
     catch(error){
@@ -95,7 +96,7 @@ const Player = () => {
   }
   useEffect(() => {
     getCourseProgress()
-  })
+  }, [])
   return courseData ? (
     <>
       <div className='p-4 sm:p-10 flex flex-row md:grid md:grid-cols-2 gap-10 md:px-36'>

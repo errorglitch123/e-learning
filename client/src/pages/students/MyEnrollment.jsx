@@ -1,9 +1,12 @@
-import React, { useContext, useState } from 'react'
-import { AppContext, AppProvider } from '../../context/AppContext'
+import React, { useContext, useEffect, useState } from 'react'
+import { AppContext } from '../../context/AppContext'
 import {Line} from 'rc-progress'
 import Footer from '../../components/students/Footer';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
 const MyEnrollment = () => {
-  const {enrolledCourses, calculateCourseDuration,navigate,userData,fetchUserEnrolledCourses,backendUrl, getToken} = useContext(AppContext);
+  const {enrolledCourses, calculateCourseDuration,navigate,userData,fetchUserEnrolledCourses,backendUrl, getToken, calculateNoOfLecture} = useContext(AppContext);
 
   const [progressArray, setProgressArray] = useState([]);
 
@@ -67,7 +70,7 @@ const MyEnrollment = () => {
                 </td>
                 <td className='px-4 py-3 max-sm:text-right'>
                   <button 
-                  className='px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 max-sm:text-sm:text-xs text-white cursor-pointer'
+                  className='px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 max-sm:text-xs text-white cursor-pointer'
                   onClick={()=> navigate('/player/' + course._id)}
                   >{
                    progressArray[index]&& progressArray[index].lectureCompleted / progressArray[index].totalLectures ===1 ? 'Completed':'On Going'

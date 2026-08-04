@@ -1,10 +1,10 @@
 import { createContext } from "react";
-import { dummyCourses } from "../assets/assets";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
 import { useAuth, useUser } from '@clerk/clerk-react';
 import axios from "axios";
+import { toast } from "react-toastify";
 
 
 export const AppContext = createContext();
@@ -15,7 +15,7 @@ export const AppProvider = (props) => {
   const [allCourses, setAllCourses] = useState([]);
   const [isEducator, setIsEducator] = useState(false);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [userData, setUserData] = useState([]);
+  const [userData, setUserData] = useState(null);
 
   const navigate = useNavigate();
   const { getToken } = useAuth()
@@ -23,7 +23,7 @@ export const AppProvider = (props) => {
 
   const fetchAllCourses = async () => {
     try {
-      const { data } = await axios.get(backendUrl + '/api/courses/all')
+      const { data } = await axios.get(backendUrl + '/api/course/all')
       if (data.success) {
         setAllCourses(data.courses)
       }
@@ -44,7 +44,7 @@ export const AppProvider = (props) => {
       const token = await getToken();
       const { data } = await axios.get(backendUrl + '/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
       if (data.success) {
-        setUserData(data.user)
+        setUserData(data.userData)
       }
       else {
         toast.error(data.message)
@@ -55,12 +55,12 @@ export const AppProvider = (props) => {
   }
 
   const calculateRating = (course) => {
-    if (course.courseRatings.length === 0) return 0;
+    if (course.courseRating.length === 0) return 0;
     let totalRating = 0;
-    course.courseRatings.forEach(rating => {
+    course.courseRating.forEach(rating => {
       totalRating += rating.rating;
     });
-    return Math.floor(totalRating / course.courseRatings.length * 10) / 10;
+    return Math.floor(totalRating / course.courseRating.length * 10) / 10;
   };
 
 

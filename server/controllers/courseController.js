@@ -4,7 +4,7 @@ import Course from "../model/Course.js";
 
 export const allCourses = async (req,res)=>{
   try{
-    const courses =  await Course.find({isPublished:true}).select('-courseContent','-enrolledStudents').
+    const courses =  await Course.find({isPublished:true}).select('-courseContent -enrolledStudents').
     populate({path:'educator'})
     res.json({success:true,courses})
   }
@@ -19,7 +19,7 @@ export const getCourseId = async (req,res)=>{
     const courseData = await Course.findById(id).populate({path:'educator'})
     courseData.courseContent.forEach((chapter)=>{
       chapter.chapterContent.forEach((lecture)=>{
-        if(!lecture.isPublished){
+        if(!lecture.isPreviewFree){
           lecture.lectureUrl = '';
         }
       })

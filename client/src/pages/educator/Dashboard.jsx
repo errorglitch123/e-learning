@@ -1,8 +1,10 @@
 import React, { useContext, useEffect } from 'react'
 import { useState } from 'react'
 import { AppContext } from '../../context/AppContext'
-import { assets, dummyDashboardData } from '../../assets/assets'
+import { assets } from '../../assets/assets'
 import Loading from '../../components/students/Loading'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Dashboard = () => {
   const [dashBoardData,setDashBoardData] = useState(null)
@@ -50,7 +52,7 @@ const Dashboard = () => {
           <div className='flex items-center gap-3 shadow-card border border-blue-500 p-4 w-56 rounded-md'>
             <img src={assets.earning_icon} alt="icon" />
             <div>
-              <p className='text-2xl font-medium text-gray-600'>{currency}{dashBoardData.totalEarnings}</p>
+              <p className='text-2xl font-medium text-gray-600'>{currency}{dashBoardData.totalEarning}</p>
               <p className='text-base text-gray-500'>Total Earnings</p>
             </div>
           </div>
@@ -59,7 +61,7 @@ const Dashboard = () => {
         <div>
           <h2 className='pb-4 text-lg font-medium'>Latest Enrollment</h2>
           <div className='flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md
-          bg-white border border-gray-500/20'></div>
+          bg-white border border-gray-500/20'>
           <table className='table-fixed md:table-auto w-full overflow-hidden'>
             <thead className='text-gray-900 border-b border-gray-500/20 text-sm text-left'>
             <tr>
@@ -68,7 +70,7 @@ const Dashboard = () => {
               <th className='px-4 py-3 font-semibold'>Course Title</th>
             </tr>
             </thead>
-            <tbody text-sm text-gray-500>
+            <tbody className='text-sm text-gray-500'>
               {dashBoardData.enrolledStudentsData.map((item,index)=>(
                 <tr key={index} className='border-b border-gray-500/20'>
                   <td className='px-4 py-3 text-center hidden sm:table-cell'>{index+1}</td>
@@ -83,6 +85,7 @@ const Dashboard = () => {
             </tbody>
 
           </table>
+          </div>
         </div>
       </div>
       </div>

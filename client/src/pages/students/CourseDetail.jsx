@@ -6,6 +6,7 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import Footer from '../../components/students/Footer';
 import Youtube from 'react-youtube'
+import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const CourseDetail = () => {
@@ -14,14 +15,14 @@ const CourseDetail = () => {
   const [openSection, setOpenSection] = useState({})
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false)
   const [playerData, setPlayerData] = useState(null)
-  const { allCourses, calculateRating, calculateChapterTime,
+  const { calculateRating, calculateChapterTime,
     calculateCourseDuration,
-    calculateNoOfLecture, currency, backendUrl, userData } = useContext(AppContext)
+    calculateNoOfLecture, currency, backendUrl, userData, getToken } = useContext(AppContext)
   const fetchCourseData = async () => {
     try {
       const { data } = await axios.get(backendUrl + `/api/course/${id}`)
       if (data.success) {
-        setCourseData(data.course)
+        setCourseData(data.courseData)
       }
     } catch (error) {
       toast.error(error.message)
@@ -43,7 +44,7 @@ const CourseDetail = () => {
       if(isAlreadyEnrolled){
         return toast.warn('You are already enrolled in this course')
       }
-      const token = await gettoken();
+      const token = await getToken();
       const { data } = await axios.post(backendUrl + `/api/user/purchase`, {courseId: courseData._id}, { headers: { Authorization: `Bearer ${token}` } })
       if(data.success){
         const {session_url}=data;
@@ -86,7 +87,7 @@ const CourseDetail = () => {
                   } className="w-4 h-4" />
                 ))}
               </div>
-              <p className="text-sm text-gray-500">({courseData.courseRatings.length})</p>
+              <p className="text-sm text-gray-500">({courseData.courseRating.length})</p>
               <p>{courseData.enrolledStudents.length} {courseData.enrolledStudents.length > 1 ? 'Students' : 'Student'}</p>
             </div>
             <p className='text-sm'>Course by <span className='text-blue-600 underline'>{courseData.educator.name}</span></p>
@@ -96,7 +97,7 @@ const CourseDetail = () => {
               <div className='pt-5'>
                 {courseData.courseContent.map((chapter, index) => (
                   <div key={index} className='border border-gray-300 bg-white rounded mb-2' >
-                    <div className='flex items-center justify-between px-4 py-3 cursor pointer select-none'
+                    <div className='flex items-center justify-between px-4 py-3 cursor-pointer select-none'
                       onClick={() => toggleSection(index)}>
                       <div className='flex items-center gap-2'>
                         <img src={assets.down_arrow_icon} alt="arrow_icon"

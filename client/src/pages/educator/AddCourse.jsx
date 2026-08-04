@@ -4,6 +4,8 @@ import Quill from 'quill'
 import "quill/dist/quill.snow.css";
 import { assets } from '../../assets/assets';
 import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 
 
@@ -112,10 +114,10 @@ const AddCourse = () => {
     try{
       e.preventDefault();
       if(!image){
-        toast.error('Please upload a course thumbnail');
+        return toast.error('Please upload a course thumbnail');
       }
       const courseData ={
-        cousteTitle,
+        courseTitle,
         courseDescription: quillRef.current.root.innerHTML,
         coursePrice:Number(coursePrice),
         discount:Number(discount),
@@ -123,8 +125,8 @@ const AddCourse = () => {
       }
       const formData = new FormData();
       formData.append('courseData', JSON.stringify(courseData));
-      formData.append('imageFile', image);
-      const token = getToken();
+      formData.append('image', image);
+      const token = await getToken();
       const {data} = await axios.post(backendUrl + '/api/educator/add-course',formData, { headers: { Authorization: `Bearer ${token}` } });
       if(data.success){
         toast.success(data.message)
