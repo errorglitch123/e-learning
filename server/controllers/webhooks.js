@@ -9,12 +9,13 @@ import Stripe from "stripe";
 export const clerkWebhooks= async (req,res)=>{
   try{
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-    await whook.verify(JSON.stringify(req.body),{
+    const payload = req.body.toString();
+    whook.verify(payload,{
       "svix-id":req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
       "svix-signature":req.headers["svix-signature"]
     })
-    const {data,type} = req.body;
+    const {data,type} = JSON.parse(payload);
     switch(type){
       case 'user.created':{
         const userData={
@@ -73,12 +74,13 @@ export const stripeWebhooks = async (req,res)=>{
       const userData = await User.findById(purchaseData.userId);
       const courseData = await Course.findById(purchaseData.courseId.toString());
 
-      courseData.enrolledStudents.push(userData);
+      courseData.enrolledStudents.push(userData._id);
       await courseData.save();
 
       userData.enrolledCourses.push(courseData._id);
       await userData.save()
       purchaseData.status = 'completed';
+      await purchaseData.save();
       break;
     }
     case 'payment_intent.payment_failed': {

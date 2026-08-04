@@ -7,7 +7,7 @@ import { AppContext } from "../../context/AppContext";
 
 const Navbar = () => {
   const location = useLocation();
-  const { navigate, isEducator,backendUrl,gettoken } = useContext(AppContext);
+  const { navigate, isEducator, backendUrl, gettoken } = useContext(AppContext);
   const isConstListPage = location.pathname === "/const-list";
   const { openSignIn, openSignUp } = useClerk();
   const { isSignedIn, user } = useUser();
@@ -20,10 +20,10 @@ const Navbar = () => {
       }
       const token = await gettoken();
       const { data } = await axios.post(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
-      if(data.success) {  
+      if (data.success) {
         setIsEducator(true);
         toast.success(data.message);
-      } 
+      }
     } catch (error) {
       toast.error(data.message);
     }

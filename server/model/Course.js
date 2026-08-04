@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const lectureSchema = new mongoose.Schema({
   lectureId:{type:String,required:true},
