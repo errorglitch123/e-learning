@@ -6,6 +6,7 @@ import humanizeDuration from 'humanize-duration'
 import YouTube from 'react-youtube'
 import Footer from '../../components/students/Footer'
 import Rating from '../../components/students/Rating'
+import Loading from '../../components/students/Loading'
 
 const Player = () => {
   const { enrolledCourses, calculateChapterTime,backendUrl,getToken,userData,fetchUserEnrolledCourses } = useContext(AppContext)
@@ -85,13 +86,17 @@ const Player = () => {
         setInitialRating(rating)
       }else{
         toast.error(data.message)
+        fetchUserEnrolledCourses()
       }
     }
     catch(error){
       toast.error(error.message)
     }
   }
-  return (
+  useEffect(() => {
+    getCourseProgress()
+  })
+  return courseData ? (
     <>
       <div className='p-4 sm:p-10 flex flex-row md:grid md:grid-cols-2 gap-10 md:px-36'>
         {/* left column */}
@@ -116,7 +121,7 @@ const Player = () => {
                                   border-gray-300'>
                     {chapter.chapterContent.map((lecture, i) => (
                       <li key={i} className='flex items-start gap-2 py-1'>
-                        <img src={false ? assets.blue_tick_icon : assets.play_icon} alt="play" className='w-4 h-4 mt-1' />
+                        <img src={progressData && progressData.lectureCompleted.includes(lecture.lectureId) ? assets.blue_tick_icon : assets.play_icon} alt="play" className='w-4 h-4 mt-1' />
                         <div className='flex items-center justify-between w-full text-xs text-gray-800 md:text-default'>
                           <p>{lecture.lectureTitle}</p>
                           <div className='flex gap-2'>
@@ -140,7 +145,7 @@ const Player = () => {
           </div>
           <div className='flex items-center gap-2 py-3 mt-10'>
             <h1 className='text-xl font-bold'>Rate this Course</h1>
-            <Rating/>
+            <Rating initialRating={initialRating} onRate={handleRate}/>
           </div>
         </div>
         {/*Right Column*/}
@@ -152,7 +157,7 @@ const Player = () => {
                   }} iframeClassName='w-full aspect-video' />
                   <div className='flex justify-between items-center mt-1'>
                     <p>{playerData.chapter}.{playerData.lecture} {playerData.lectureTitle}</p>
-                    <button className='text-blue-600'>{false ?'Completed':'Mark Completed'}</button>
+                    <button onClick={() => markLectureCompleted(playerData.lectureId)} className='text-blue-600'>{progressData && progressData.lectureCompleted.includes(playerData.lectureId) ?'Completed':'Mark Completed'}</button>
                   </div>
             </div>
           ):<img src={courseData ? courseData.courseThumbnail : ''} alt="" />
@@ -161,7 +166,7 @@ const Player = () => {
       </div>
       <Footer/> 
     </>
-  )
+  ):<Loading/>
 }
 
 export default Player

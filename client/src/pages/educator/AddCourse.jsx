@@ -1,13 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState,useContext } from 'react'
 import uniqid from 'uniqid'
 import Quill from 'quill'
 import "quill/dist/quill.snow.css";
 import { assets } from '../../assets/assets';
+import { AppContext } from '../../context/AppContext';
+
 
 
 const AddCourse = () => {
   const quillRef = useRef(null);
   const editorRef = useRef(null);
+  const {backendUrl, getToken} = useContext(AppContext);
 
   const [courseTitle, setCourseTitle] = useState('');
   const [coursePrice, setCoursePrice] = useState(0);
@@ -106,7 +109,38 @@ const AddCourse = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    try{
+      e.preventDefault();
+      if(!image){
+        toast.error('Please upload a course thumbnail');
+      }
+      const courseData ={
+        cousteTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice:Number(coursePrice),
+        discount:Number(discount),
+        courseContent:chapters,
+      }
+      const formData = new FormData();
+      formData.append('courseData', JSON.stringify(courseData));
+      formData.append('imageFile', image);
+      const token = getToken();
+      const {data} = await axios.post(backendUrl + '/api/educator/add-course',formData, { headers: { Authorization: `Bearer ${token}` } });
+      if(data.success){
+        toast.success(data.message)
+        setCourseTitle('');
+        setCoursePrice(0);
+        setDiscount(0);
+        setImage(null);
+        setChapters([]);
+      }
+      else{
+        toast.error(data.message)
+      }
+    }
+    catch(error){
+      toast.error(error.message)
+    }
     // You can access the quill HTML content here via: 
     // const description = quillRef.current.root.innerHTML;
   };

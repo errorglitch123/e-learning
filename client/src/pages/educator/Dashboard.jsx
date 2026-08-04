@@ -6,14 +6,28 @@ import Loading from '../../components/students/Loading'
 
 const Dashboard = () => {
   const [dashBoardData,setDashBoardData] = useState(null)
-  const {currency} = useContext(AppContext)
+  const {currency,isEducator,getToken,backendUrl} = useContext(AppContext)
 
   const fetchDashBoardData = async ()=>{
-    setDashBoardData(dummyDashboardData)
+    try{
+      const token = await getToken();
+      const {data} = await axios.get(backendUrl + '/api/educator/dashboard',{ headers: { Authorization: `Bearer ${token}` } });
+      if(data.success){
+        setDashBoardData(data.dashboardData)
+      }
+      else{
+        toast.error(data.message)
+      }
+    }
+    catch(error){
+      toast.error(error.message)
+    }
   }
   useEffect(()=>{
-    fetchDashBoardData()
-  },[])
+    if(isEducator){
+      fetchDashBoardData()
+    }
+  },[isEducator])
   return dashBoardData ?(
     <div className='min-h-screen flex flex-col items-start justify-between gap-8
     md:p-8  md:pb-0 p-4 pt-8  pb-0'>
