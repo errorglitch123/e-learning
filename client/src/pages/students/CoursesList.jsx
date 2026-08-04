@@ -14,12 +14,15 @@ const CoursesList = () => {
     if(allCourses && allCourses.length > 0){
       const tempCourses = allCourses.slice()
 
-      input ?
-      setFilterCourses(
-        tempCourses.filter(
-          item=> item.courseTitle.toLowerCase().includes(input.toLowerCase())
+      if (input) {
+        setFilterCourses(
+          tempCourses.filter(
+            item=> item.courseTitle.toLowerCase().includes(input.toLowerCase())
+          )
         )
-      ): setFilterCourses(tempCourses)
+      } else {
+        setFilterCourses(tempCourses)
+      }
     }
   },[allCourses,input])
   return (

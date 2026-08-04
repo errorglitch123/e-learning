@@ -3,12 +3,21 @@ import { CourseProgress } from "../model/CourseProgress.js";
 import { Purchase } from "../model/Purchase.js";
 import User from "../model/User.js";
 import Stripe from 'stripe'
+import { clerkClient } from '@clerk/express'
+
 export const getUserById = async( req,res)=>{
   try{
     const userId = req.auth.userId;
-    const userData = await User.findById(userId);
+    let userData = await User.findById(userId);
     if(!userData){
-      return res.json({success:false,message:'User not found'})
+      // Auto-create user from Clerk data (handles missing webhook scenario)
+      const clerkUser = await clerkClient.users.getUser(userId);
+      userData = await User.create({
+        _id: userId,
+        email: clerkUser.emailAddresses[0].emailAddress,
+        name: (clerkUser.firstName || '') + ' ' + (clerkUser.lastName || ''),
+        imageUrl: clerkUser.imageUrl,
+      });
     }
     res.json({success:true,userData})
   }
@@ -16,6 +25,7 @@ export const getUserById = async( req,res)=>{
     res.json({success:false,message:error.message})
   }
 }
+
 export const userEnrolledCourses = async(req,res)=>{
   try{
     const userId = req.auth.userId;
