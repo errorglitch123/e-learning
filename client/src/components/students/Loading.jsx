@@ -34,7 +34,7 @@ const Loading = () => {
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [path, navigate, searchParams, backendUrl, getToken, fetchUserEnrolledCourses]);
+  }, [path]);
 
   return (
     <div className='min-h-screen flex items-center justify-center'>
