@@ -37,7 +37,7 @@ export const AppProvider = (props) => {
 
   //fetch user Data
   const fetchUserData = async () => {
-    if (user.publicMetadata.role === "educator") {
+    if (user.publicMetadata?.role === "educator") {
       setIsEducator(true)
     }
     try {
