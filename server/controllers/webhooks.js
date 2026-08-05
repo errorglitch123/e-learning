@@ -59,6 +59,7 @@ export const stripeWebhooks = async (req,res)=>{
     event = stripeInstance.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   }
   catch (err) {
+    console.error("Stripe Webhook Signature Verification Failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   // handle the event
@@ -67,7 +68,7 @@ export const stripeWebhooks = async (req,res)=>{
       const paymentIntent = event.data.object;
       const paymentIntentId = paymentIntent.id;
       const session = await stripeInstance.checkout.sessions.list({
-        payment_intent:paymentIntentId,
+        payment_intent: paymentIntentId,
       })
       const {purchaseId} = session.data[0].metadata;
       const purchaseData = await Purchase.findById(purchaseId);
