@@ -158,7 +158,7 @@ const Player = () => {
                   }} iframeClassName='w-full aspect-video' />
                   <div className='flex justify-between items-center mt-1'>
                     <p>{playerData.chapter}.{playerData.lecture} {playerData.lectureTitle}</p>
-                    <button onClick={() => markLectureCompleted(playerData.lectureId)} className='text-blue-600'>{progressData && progressData.lectureCompleted.includes(playerData.lectureId) ?'Completed':'Mark Completed'}</button>
+                    <button onClick={() => markLectureCompleted(playerData.lectureId)} className='text-blue-600 cursor-pointer'>{progressData && progressData.lectureCompleted.includes(playerData.lectureId) ?'Completed':'Mark Completed'}</button>
                   </div>
             </div>
           ):<img src={courseData ? courseData.courseThumbnail : ''} alt="" />

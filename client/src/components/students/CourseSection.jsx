@@ -16,9 +16,9 @@ const CourseSection = () => {
           <CourseCard key={index} course={course} />
         ))}
       </div>
-      <a href={'/course-list'} onClick ={()=>scrollTo(0,0)}
-       className = 'text-gray-500 border border-gray-500/30 px-10 py-3 rounded mt-3'
-      >Show all courses</a>
+      <a href={'/course-list'} onClick ={()=>scrollTo(0,0)} 
+      className="text-gray-500 border border-gray-500/30 px-10 py-3 rounded cursor-pointer">
+        Show all courses</a>
     </div>
   )
 }

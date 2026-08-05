@@ -43,7 +43,7 @@ const Navbar = () => {
         <div className="flex items-center gap-5">
           {user &&
             <>
-              <button onClick={becomeEducator}>
+              <button onClick={becomeEducator} className="cursor-pointer">
                 {isEducator ? "Educator Dashboard" : "Be Educator"}
               </button>
               | <Link to="/my-enrollment">
@@ -61,7 +61,7 @@ const Navbar = () => {
         <div className="flex items-center gap-1 sm:gap-2 max-sm:text-xs">
           {user &&
             <>
-              <button onClick={becomeEducator}>
+              <button onClick={becomeEducator} className="cursor-pointer">
                 {isEducator ? "Educator Dashboard" : "Be Educator"}
               </button>
               | <Link to="/my-enrollment">
