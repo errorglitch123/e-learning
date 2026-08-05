@@ -27,9 +27,8 @@ export const addNewCourse = async (req, res) => {
     if (!imageFile) {
       return res.json({ success: false, message: 'Thumbnail not attached' });
     }
-    const parsedCourseData = await JSON.parse(courseData)
+    const parsedCourseData = JSON.parse(courseData)
     parsedCourseData.educator = educatorId;
-    const newCourse = await Course.create(parsedCourseData)
     
     // Explicitly configure before upload to prevent 'must supply api_key' errors in ESM
     cloudinary.config({
@@ -39,8 +38,9 @@ export const addNewCourse = async (req, res) => {
     });
     
     const imageUpload = await cloudinary.uploader.upload(imageFile.path)
-    newCourse.courseThumbnail = imageUpload.secure_url
-    await newCourse.save();
+    parsedCourseData.courseThumbnail = imageUpload.secure_url;
+    
+    await Course.create(parsedCourseData)
     res.json({ success: true, message: 'Course Added' })
 
   } catch (error) {
