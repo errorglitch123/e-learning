@@ -153,7 +153,7 @@ const Player = () => {
         <div className='md:mt-10'>
           {playerData ? (
             <div>
-              <YouTube videoId={playerData.lectureUrl.split('/').pop()} opts={{
+              <YouTube videoId={playerData.lectureUrl.includes("v=") ? playerData.lectureUrl.split("v=")[1].split("&")[0] : playerData.lectureUrl.split('/').pop()} opts={{
                     playerVars: { autoplay: 1 }
                   }} iframeClassName='w-full aspect-video' />
                   <div className='flex justify-between items-center mt-1'>

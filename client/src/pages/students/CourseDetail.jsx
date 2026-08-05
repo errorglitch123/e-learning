@@ -120,7 +120,7 @@ const CourseDetail = () => {
                                   <p className='text-blue-500 cursor-pointer'
                                     onClick={() =>
                                       setPlayerData({
-                                        videoId: lecture.lectureUrl.split("/").pop(),
+                                        videoId: lecture.lectureUrl.includes("v=") ? lecture.lectureUrl.split("v=")[1].split("&")[0] : lecture.lectureUrl.split("/").pop(),
                                       })
                                     }
                                   >Preview</p>}
