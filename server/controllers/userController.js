@@ -76,7 +76,7 @@ export const purchaseCourse = async (req,res)=>{
       }
     ] 
     const session = await stripeInstance.checkout.sessions.create({
-      success_url:`${origin}/loading/my-enrollment`,
+      success_url:`${origin}/loading/my-enrollment?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:`${origin}/`,
       line_items:lineItem,
       mode:'payment',
@@ -158,5 +158,47 @@ export const addUserRating = async(req,res)=>{
     return res.json({success:true,message:'Rating added'});
   } catch (error) {
     res.json({success:false,message:error.message})
+  }
+}
+
+// Manually verify Stripe purchase (Foolproof fallback)
+export const verifyStripePurchase = async (req,res)=>{
+  try {
+    const { sessionId } = req.body;
+    const userId = getAuth(req).userId;
+    if(!sessionId || !userId) return res.json({success:false, message: 'Invalid details'});
+
+    const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
+    
+    if (session && session.payment_status === 'paid') {
+      const purchaseId = session.metadata.purchaseId;
+      const purchaseData = await Purchase.findById(purchaseId);
+      
+      if(!purchaseData) return res.json({success:false, message: 'Purchase not found'});
+      if(purchaseData.status === 'completed') return res.json({success:true, message: 'Already completed'});
+
+      const userData = await User.findById(userId);
+      const courseData = await Course.findById(purchaseData.courseId.toString());
+
+      if(!courseData.enrolledStudents.includes(userData._id)){
+        courseData.enrolledStudents.push(userData._id);
+        await courseData.save();
+      }
+
+      if(!userData.enrolledCourses.includes(courseData._id)){
+        userData.enrolledCourses.push(courseData._id);
+        await userData.save();
+      }
+
+      purchaseData.status = 'completed';
+      await purchaseData.save();
+      
+      return res.json({success:true, message: 'Purchase Verified'});
+    }
+    
+    res.json({success:false, message: 'Payment not verified yet'});
+  } catch (error) {
+    res.json({success:false, message: error.message});
   }
 }
