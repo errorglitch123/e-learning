@@ -53,13 +53,15 @@ export const clerkWebhooks= async (req,res)=>{
 }
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
 export const stripeWebhooks = async (req,res)=>{
-  const sig = req.headers['stripe-signature'];
   let event;
   try {
-    event = stripeInstance.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    // Vercel parses the body automatically. Instead of failing signature verification,
+    // we securely fetch the true event directly from Stripe using the ID!
+    const eventId = typeof req.body === 'string' ? JSON.parse(req.body).id : (req.body.id ? req.body.id : JSON.parse(req.body.toString()).id);
+    event = await stripeInstance.events.retrieve(eventId);
   }
   catch (err) {
-    console.error("Stripe Webhook Signature Verification Failed:", err.message);
+    console.error("Stripe Webhook Error:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   // handle the event
